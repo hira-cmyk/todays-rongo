@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>今日の論語 - ピクセル版</title>
     <!-- レトロゲーム風フォント読み込み -->
-    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+    <!-- 本文用の読みやすいフォント -->
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #2b223a;
@@ -15,7 +16,7 @@
             --text-color: #2b2b2b;
         }
         body {
-            font-family: 'DotGothic16', monospace, sans-serif;
+            font-family: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -40,6 +41,9 @@
             text-align: center;
             box-sizing: border-box;
         }
+        .pixel-title, .loading-text, .badge {
+            font-family: 'DotGothic16', monospace;
+        }
         .pixel-title {
             font-size: 2.2rem;
             color: #d9480f;
@@ -49,7 +53,8 @@
         }
         .subtitle {
             font-size: 1rem;
-            color: #666;
+            font-weight: 500;
+            color: #555;
             margin-bottom: 25px;
         }
         .pixel-btn {
@@ -121,22 +126,23 @@
             box-shadow: 2px 2px 0px #000;
         }
         .rongo-reading {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #212529;
-            margin-bottom: 15px;
-            line-height: 1.5;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 18px;
+            line-height: 1.8;
         }
         .rongo-meaning {
-            font-size: 1rem;
-            color: #495057;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #343a40;
             text-align: left;
             background-color: #f8f9fa;
             border: 2px solid #dee2e6;
-            padding: 12px;
+            padding: 14px;
             width: 100%;
             box-sizing: border-box;
-            line-height: 1.5;
+            line-height: 1.9;
             margin-bottom: 15px;
         }
         .action-buttons {
@@ -291,8 +297,16 @@
             window.open(url, '_blank');
         }
 
-        function generateStoryImage() {
+        async function generateStoryImage() {
             if (!currentQuote) return;
+            // フォント読み込みを待ってから描画
+            try {
+                await Promise.all([
+                    document.fonts.load('64px "DotGothic16"'),
+                    document.fonts.load('700 52px "Zen Maru Gothic"'),
+                    document.fonts.load('500 38px "Zen Maru Gothic"')
+                ]);
+            } catch (e) {}
             const canvas = document.getElementById('story-canvas');
             const ctx = canvas.getContext('2d');
 
@@ -355,7 +369,7 @@
             ctx.fillText(currentQuote.category, 740, 410);
 
             // 書き下し文
-            ctx.font = 'bold 52px "DotGothic16", monospace';
+            ctx.font = '700 52px "Zen Maru Gothic", sans-serif';
             ctx.fillStyle = "#212529";
             ctx.textAlign = "center";
             let readingY = wrapText(currentQuote.reading, canvas.width / 2, 600, 800, 80);
@@ -375,17 +389,17 @@
             ctx.fillRect(180, readingY + 140, 720, 450);
             ctx.strokeRect(180, readingY + 140, 720, 450);
 
-            ctx.font = 'bold 36px "DotGothic16", monospace';
+            ctx.font = '700 36px "Zen Maru Gothic", sans-serif';
             ctx.fillStyle = "#495057";
             ctx.textAlign = "left";
             ctx.fillText("【 意味 】", 230, readingY + 220);
 
-            ctx.font = '38px "DotGothic16", monospace';
+            ctx.font = '500 38px "Zen Maru Gothic", sans-serif';
             ctx.fillStyle = "#212529";
-            wrapText(currentQuote.meaning, 230, readingY + 300, 620, 56);
+            wrapText(currentQuote.meaning, 230, readingY + 300, 620, 64);
 
             // フッター
-            ctx.font = '32px "DotGothic16", monospace';
+            ctx.font = '500 32px "Zen Maru Gothic", sans-serif';
             ctx.fillStyle = "#868e96";
             ctx.textAlign = "center";
             ctx.fillText("毎日のルーティンに・今日の智慧をシェア", canvas.width / 2, 1700);
