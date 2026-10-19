@@ -433,15 +433,108 @@
             ctx.fillStyle = "#212529";
             wrapText(currentQuote.meaning, 230, readingY + 300, 620, 64);
 
+            // ピクセルイラスト（竹簡・賢人・竹）
+            drawRongoIllustration(ctx);
+
             // フッター
             ctx.font = '500 32px "Zen Maru Gothic", sans-serif';
             ctx.fillStyle = "#868e96";
             ctx.textAlign = "center";
-            ctx.fillText("毎日のルーティンに・今日の智慧をシェア", canvas.width / 2, 1700);
+            ctx.fillText("毎日のルーティンに・今日の智慧をシェア", canvas.width / 2, 1725);
 
             // 画面に表示（長押しで保存）
             document.getElementById('story-preview').src = canvas.toDataURL('image/png');
             document.getElementById('story-modal').classList.remove('hidden');
+        }
+
+        // ドット絵を描く: rows は1文字=1ドット、"." は透明
+        function drawSprite(ctx, rows, palette, x, y, scale) {
+            rows.forEach((row, ry) => {
+                [...row].forEach((c, rx) => {
+                    if (c === '.' || !palette[c]) return;
+                    ctx.fillStyle = palette[c];
+                    ctx.fillRect(x + rx * scale, y + ry * scale, scale, scale);
+                });
+            });
+        }
+
+        function drawRongoIllustration(ctx) {
+            const groundY = 1660;
+
+            // 地面
+            ctx.fillStyle = "#94d82d";
+            ctx.fillRect(130, groundY, 820, 12);
+            ctx.fillStyle = "#5c940d";
+            ctx.fillRect(130, groundY + 12, 820, 12);
+
+            // 竹簡（巻物）
+            const scroll = [
+                "..CCCCCCCCCCCCCCCCCC..",
+                "CTDTDTDTDTDTDTDTDTDTDC",
+                "CTDTDTDTDTDTDTDTDTDTDC",
+                "CCCCCCCCCCCCCCCCCCCCCC",
+                "CTDIDTDTDIDTDIDTDTDIDC",
+                "CTDIDTDIDTDTDIDTDIDTDC",
+                "CTDTDTDIDTDIDTDTDIDTDC",
+                "CTDIDTDTDTDIDTDIDTDTDC",
+                "CTDIDTDIDTDTDTDTDIDTDC",
+                "CCCCCCCCCCCCCCCCCCCCCC",
+                "CTDTDTDTDTDTDTDTDTDTDC",
+                "..CCCCCCCCCCCCCCCCCC.."
+            ];
+            drawSprite(ctx, scroll, {
+                C: "#7f4f24", T: "#f4d58d", D: "#d4a373", I: "#2b2b2b"
+            }, 160, groundY - 12 * 10, 10);
+
+            // 賢人（ドット絵の老師）
+            const sage = [
+                "......HHHH......",
+                ".....HHHHHH.....",
+                "....KKKKKKKK....",
+                "....KSSSSSSK....",
+                "....SKSSSSKS....",
+                "....SSSSSSSS....",
+                "....SWSSSSWS....",
+                ".....WWWWWW.....",
+                "......WWWW......",
+                "...RRRRWWRRRR...",
+                "..RRRRRWWRRRRR..",
+                ".RRRRRRRRRRRRRR.",
+                ".RRRSBBBBBBSRRR.",
+                ".RRRSBIBIBBSRRR.",
+                "..RRRYYYYYYRRR..",
+                "..RRRRRRRRRRRR..",
+                "..RRRRRRRRRRRR..",
+                "..RRRRRRRRRRRR..",
+                "...KK......KK...",
+                "...KK......KK..."
+            ];
+            drawSprite(ctx, sage, {
+                H: "#212529", K: "#343a40", S: "#f2c9a0", W: "#dee2e6",
+                R: "#c92a2a", Y: "#fab005", B: "#f4d58d", I: "#2b2b2b"
+            }, 444, groundY - 20 * 12, 12);
+
+            // 竹
+            const s = 10;
+            const stalks = [{ x: 760, h: 24 }, { x: 830, h: 20 }];
+            stalks.forEach(st => {
+                for (let i = 0; i < st.h; i++) {
+                    const y = groundY - (i + 1) * s;
+                    ctx.fillStyle = (i % 6 === 5) ? "#2b8a3e" : "#51cf66";
+                    ctx.fillRect(st.x, y, s * 2, s);
+                    ctx.fillStyle = "#37b24d";
+                    ctx.fillRect(st.x + s * 2 - 4, y, 4, s);
+                }
+            });
+            // 竹の葉
+            ctx.fillStyle = "#40c057";
+            const leaves = [
+                [780, 1440, 1], [790, 1430, 1], [800, 1420, 1],
+                [740, 1460, -1], [730, 1450, -1], [720, 1440, -1],
+                [850, 1480, 1], [860, 1470, 1], [870, 1460, 1],
+                [810, 1500, -1], [800, 1490, -1]
+            ];
+            leaves.forEach(([lx, ly]) => ctx.fillRect(lx, ly, 20, 10));
         }
 
         function closeStoryModal() {
