@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日の論語 - ピクセル版</title>
+    <!-- レトロゲーム風フォント読み込み -->
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #2b223a;
+            --container-bg: #fff8eb;
+            --accent-color: #ff6b6b;
+            --accent-hover: #fa5252;
+            --text-color: #2b2b2b;
+        }
+        body {
+            font-family: 'DotGothic16', monospace, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(#4a3b5c 15%, transparent 16%),
+                radial-gradient(#4a3b5c 15%, transparent 16%);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+        }
+        .container {
+            background-color: var(--container-bg);
+            border: 4px solid #fff;
+            box-shadow: 6px 6px 0px #000000;
+            padding: 30px 20px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .pixel-title {
+            font-size: 2.2rem;
+            color: #d9480f;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px #ffd43b;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 25px;
+        }
+        .pixel-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: 3px solid #000;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            font-family: 'DotGothic16', monospace;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px #000;
+            transition: transform 0.1s, box-shadow 0.1s;
+            margin: 5px;
+            font-weight: bold;
+        }
+        .pixel-btn:hover {
+            background-color: var(--accent-hover);
+        }
+        .pixel-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+        .pixel-btn:disabled {
+            background-color: #adb5bd;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .btn-x { background-color: #212529; }
+        .btn-x:hover { background-color: #343a40; }
+        .btn-story { background-color: #e03131; }
+        .btn-story:hover { background-color: #c92a2a; }
+        .btn-retry { background-color: #2b8a3e; }
+        .btn-retry:hover { background-color: #2b8a3e; }
+
+        .result-box {
+            margin-top: 25px;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 3px dashed #ced4da;
+            padding: 20px;
+            background-color: #ffffff;
+            box-sizing: border-box;
+        }
+        .loading-text {
+            font-size: 1.3rem;
+            color: #d9480f;
+            animation: blink 0.5s infinite alternate;
+        }
+        @keyframes blink {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        .roulette-display {
+            font-size: 1.2rem;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        .badge {
+            display: inline-block;
+            background: #ffec99;
+            border: 2px solid #000;
+            padding: 2px 8px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            box-shadow: 2px 2px 0px #000;
+        }
+        .rongo-reading {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #212529;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .rongo-meaning {
+            font-size: 1rem;
+            color: #495057;
+            text-align: left;
+            background-color: #f8f9fa;
+            border: 2px solid #dee2e6;
+            padding: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="pixel-title">★ 今日の論語 ★</div>
+        <div class="subtitle">ピクセル世界で学ぶ、古代の知恵</div>
+        
+        <button id="draw-btn" class="pixel-btn" onclick="startRoulette()">▼ おみくじを引く ▼</button>
+
+        <div class="result-box">
+            <div id="initial-msg" class="roulette-display">ボタンを押して、今日の言葉を引き当てよう！</div>
+            
+            <div id="loading-area" class="hidden">
+                <div class="roulette-display" id="roulette-text">シャッフル中...</div>
+                <div class="loading-text">運命の言葉を選定中... (5秒)</div>
+            </div>
+
+            <div id="result-area" class="hidden">
+                <div>
+                    <span class="badge" id="res-chapter"></span>
+                    <span class="badge" id="res-category"></span>
+                </div>
+                <div class="rongo-reading" id="res-reading"></div>
+                <div class="rongo-meaning" id="res-meaning"></div>
+                
+                <div class="action-buttons">
+                    <button class="pixel-btn btn-x" onclick="shareOnX()">𝕏 シェア</button>
+                    <button class="pixel-btn btn-story" onclick="generateStoryImage()">📱 ストーリー用画像</button>
+                    <button class="pixel-btn btn-retry" onclick="startRoulette()">🔄 もう一度</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="story-canvas" width="1080" height="1920" style="display:none;"></canvas>
+
+    <script>
+        // スプレッドシートと連動した50個の全データ
+        const rongoData = [
+            { id: 1, chapter: "学而第一", word: "子曰、學而時習之、不亦說乎。", reading: "子曰わく、学びて時にこれを習う、また説ばしからずや。", meaning: "学んだことを折に触れて復習し習熟していくのは、なんと嬉しいことだろうか。", category: "学び・成長" },
+            { id: 2, chapter: "学而第一", word: "吾日三省吾身。", reading: "吾日に三たび吾が身を省みる。", meaning: "私は毎日何度も自分自身の言動を振り返り反省している。", category: "自己省察" },
+            { id: 3, chapter: "為政第二", word: "温故而知新、可以爲師矣。", reading: "故きを温ねて新しきを知れば、以て師と為るべし。", meaning: "昔の知識や物事を探求して新しい見解や知識を得ることができれば、人の師となることができる。", category: "学び・智慧" },
+            { id: 4, chapter: "為政第二", word: "知之爲知之、不知爲不知、是知也。", reading: "これを知るをこれを知ると為し、知らざるを知らざると為す、これ知るなり。", meaning: "知っていることを知っているとし、知らないことを知らないと自覚すること、それこそが本当の知るということだ。", category: "誠実・態度" },
+            { id: 5, chapter: "里仁第四", word: "見賢思齊焉、見不賢而内自省也。", reading: "賢を見ては斉しからんことを思い、不賢を見ては内に自ら省みるなり。", meaning: "優れた人を見たら自分もそうなりたいと思い、優れていない人を見たら自分にも同じ欠点がないか反省する。", category: "人間関係・修養" },
+            { id: 6, chapter: "述而第七", word: "三人行、必有我師焉。", reading: "三人行けば、必ず我が師有り。", meaning: "3人で道を歩けば、その中には必ず自分の手本となる師がいる。", category: "謙虚・学習" },
+            { id: 7, chapter: "雍也第六", word: "知之者不如好之者、好之者不如樂之者。", reading: "これを知る者はこれを好む者に如かず。これを好む者はこれを楽しむ者に如かず。", meaning: "知っているだけの人は好きな人には敵わない。好きな人も心から楽しんでいる人には敵わない。", category: "情熱・楽しみ" },
+            { id: 8, chapter: "泰伯第八", word: "任重而道遠。", reading: "任重くして道遠し。", meaning: "課せられた責任や使命は重く、目指すべき道はまだはるかに遠い。", category: "志・覚悟" },
+            { id: 9, chapter: "衛霊公第十五", word: "過而不改、是謂過矣。", reading: "過ちて改めざる、これを過ちと謂う。", meaning: "過ちを犯しながら改めようとしないこと、これこそを本当の過ちというのだ。", category: "誠実・改善" },
+            { id: 10, chapter: "衛霊公第十五", word: "己所不欲、勿施於人。", reading: "己の欲せざる所、人に施すこと勿れ。", meaning: "自分が人からされたくないと思うようなことを、決して人にしてはならない。", category: "仁・思いやり" },
+            { id: 11, chapter: "為政第二", word: "学而不思則罔、思而不学則殆。", reading: "学んで思わざれば則ち罔し、思いて学ばざれば則ち殆し。", meaning: "学んでも自分で深く考えなければ迷ってしまう。考えるだけで学ぼうとしなければ危険である。", category: "学び・成長" },
+            { id: 12, chapter: "為政第二", word: "子曰、由、誨女知之乎。知之爲知之、不知爲不知、是知也。", reading: "子曰わく、由よ、知るをこれしるとなし、しらざるをしらざるとなす、これしるなり。", meaning: "知っていることと知らないことを明確に分け、知らぬは知らずと認めることこそが知恵の本質である。", category: "誠実・態度" },
+            { id: 13, chapter: "里仁第四", word: "朝聞道、夕死可矣。", reading: "朝に道を聞かば、夕に死するとも可なり。", meaning: "朝に人として生きるべき正しい道を知ることができたなら、その日の夕方に死んだとしても後悔はない。", category: "志・覚悟" },
+            { id: 14, chapter: "里仁第四", word: "君子喩於義、小人喩於利。", reading: "君子は義に喩り、小人は利に喩る。", meaning: "優れた人物は「道義」を基準に考え、つまらない人は「利益」を基準に考える。", category: "人間関係・修養" },
+            { id: 15, chapter: "里仁第四", word: "見不賢而内自省也。", reading: "不賢を見ては内に自ら省みるなり。", meaning: "自分より劣っている人や不道徳な人を見たときには、我が身を振り返り、自分に同じ欠点がないか省みなさい。", category: "自己省察" },
+            { id: 16, chapter: "公冶長第五", word: "敏而好學、不恥下問。", reading: "敏にして学を好み、下問を恥じず。", meaning: "頭の回転が速く熱心に学び、自分より下の人に教えを請うことを恥じない。", category: "謙虚・学習" },
+            { id: 17, chapter: "雍也第六", word: "質勝文則野、文勝質則史。文質彬彬、然後君子。", reading: "質勝てば則ち野、文勝てば則ち史。文質彬彬として、然る後に君子なり。", meaning: "中身の誠実さと外見の飾り気が美しく調和してこそ、立派な人物といえる。", category: "人間関係・修養" },
+            { id: 18, chapter: "雍也第六", word: "知者樂水、仁者樂山。", reading: "知者は水を楽しみ、仁者は山を楽しむ。", meaning: "知恵者は流れ動く水を好み、徳の高い仁者はどっしりと動かない山を好む。", category: "学び・智慧" },
+            { id: 19, chapter: "述而第七", word: "飯疏食飲水、曲肱而枕之、樂亦在其中矣。不義而富且貴、於我如浮雲。", reading: "疏食を食らい水を飲み、肱を曲げてこれを枕す、楽しみ亦その中に在り。", meaning: "粗末な食事で腕を枕にする生活であっても、楽しみはその中にある。", category: "情熱・楽しみ" },
+            { id: 20, chapter: "述而第七", word: "發憤忘食、樂以忘憂、不知老之将至云爾。", reading: "発憤しては食を忘れ、楽みては以て憂いを忘れ、老ゆるの将に至らんとするを知らざるのみ。", meaning: "夢中になって学問に打ち込むあまり、食事や年齢のことさえ忘れてしまうほどである。", category: "情熱・楽しみ" },
+            { id: 21, chapter: "述而第七", word: "子不語怪力乱神。", reading: "子は怪・力・乱・神を語らず。", meaning: "孔子は、奇怪なこと、暴力的なこと、秩序を乱すこと、神怪なことについては進んで話題にしなかった。", category: "誠実・態度" },
+            { id: 22, chapter: "泰伯第八", word: "士不可以不弘毅、任重而道遠。", reading: "士は以て弘毅ならざるべからず、任重くして道遠し。", meaning: "志を持つ人は心が広く気魄が強くなければならない。使命は重く道は遠いからである。", category: "志・覚悟" },
+            { id: 23, chapter: "子罕第九", word: "逝者如斯夫、不舍昼夜。", reading: "逝く者は斯の如きか、昼夜を捨たず。", meaning: "過ぎ去っていく時は、この川の水の流れのようだなあ。昼も夜も休むことがない。", category: "志・覚悟" },
+            { id: 24, chapter: "子罕第九", word: "三軍可奪帥也、匹夫不可奪志也。", reading: "三軍も帥を奪うべきなり、匹夫も志を奪うべからず。", meaning: "大軍から総司令官を奪うことはできても、一人の人間の固い志を奪うことはできない。", category: "志・覚悟" },
+            { id: 25, chapter: "郷党第十", word: "君子不食悪肉、不臭不食。", reading: "君子は悪肉を食わず、臭ならずんば食わず。", meaning: "君子は傷んだ肉を食べず、においが変になったものも食べない。", category: "誠実・態度" },
+            { id: 26, chapter: "先進第十一", word: "過猶不及。", reading: "過ぎたるは猶及ばざるが如し。", meaning: "やり過ぎることは、足りないことと同じようによくない。何事もバランスが大切だ。", category: "人間関係・修養" },
+            { id: 27, chapter: "顔淵第十二", word: "子曰、己所不欲、勿施於人。", reading: "子曰わく、己の欲せざる所、人に施すこと勿れ。", meaning: "自分が人からされたくないと思うようなことを、決して人にしてはならない。", category: "仁・思いやり" },
+            { id: 28, chapter: "顔淵第十二", word: "主忠信、無友不如己者。", reading: "忠信を主とし、己に如かざる者を友とすること無かれ。", meaning: "誠実さと信義を第一にし、互いに高め合える友を持ちなさい。", category: "人間関係・修養" },
+            { id: 29, chapter: "顔淵第十二", word: "君子成人之美、不成人之悪。", reading: "君子は人の美を成し、人の悪を成さず。", meaning: "優れた人は、他人の良い面や成功を助長し、悪い面を助長するようなことはしない。", category: "仁・思いやり" },
+            { id: 30, chapter: "子路第十三", word: "其身正、不令而行；其身不正、雖令不從。", reading: "其の身正しければ、令せずして行わる。", meaning: "指導者自身の行いが正しければ、命令しなくても人々は従う。", category: "人間関係・修養" },
+            { id: 31, chapter: "子路第十三", word: "剛毅木訥、近仁。", reading: "剛毅木訥は仁に近し。", meaning: "意志が強く飾り気がなく口数が少ない態度は、思いやりの境地に近い。", category: "誠実・態度" },
+            { id: 32, chapter: "憲問第十四", word: "見利思義、見危授命。", reading: "利を見ては義を思えば、危うきを見ては命を授く。", meaning: "利益を前にしたときは正義を考え、危機に直面したときは命を投げ出す覚悟を持つ。", category: "志・覚悟" },
+            { id: 33, chapter: "憲問第十四", word: "古之学者為己、今之学者为人。", reading: "古の学者は為己、今の学者は為人。", meaning: "昔の学問は自分を磨くためだったが、今の学者は人に見せるためになってしまっている。", category: "自己省察" },
+            { id: 34, chapter: "衛霊公第十五", word: "人無遠慮、必有近憂。", reading: "人に遠き慮り無くば、必ず近き憂い有り。", meaning: "将来に対する遠き先を見据えた心構えがなければ、必ず目の前で心配事が起こる。", category: "志・覚悟" },
+            { id: 35, chapter: "衛霊公第十五", word: "過而能改、善莫大焉。", reading: "過ちてよく改むれば、善これより大なるはなし。", meaning: "過ちを犯したときに、それを素直に改めること。これより素晴らしい善行はない。", category: "誠実・改善" },
+            { id: 36, chapter: "衛霊公第十五", word: "君子求諸己、小人求諸人。", reading: "君子は諸を己に求め、小人は諸を人に求む。", meaning: "優れた人は問題が起きたときに自分に原因を求めるが、つまらない人は人のせいにする。", category: "自己省察" },
+            { id: 37, chapter: "季氏第十六", word: "益者三友、損者三友。", reading: "益者三友、損者三友。", meaning: "付き合ってプラスになる有益な友人と、マイナスになる有害な友人がそれぞれ3種類いる。", category: "人間関係・修養" },
+            { id: 38, chapter: "陽貨第十七", word: "性相近也、習相遠也。", reading: "性は相近きなり、習えば相遠きなり。", meaning: "人間の本質はみな似ているが、後天的な習慣によって大きな差が生まれる。", category: "学び・成長" },
+            { id: 39, chapter: "陽貨第十七", word: "唯女子與小人爲難養也。", reading: "唯だ女子と小人とは養い難しとなす。", meaning: "日頃の接し方に気を使うべきなのは、おもねりやすい人たちである。", category: "人間関係・修養" },
+            { id: 40, chapter: "微子第十八", word: "往者不可諫、來者犹可追。", reading: "往者不可諫めず、来たる者は猶お追うべし。", meaning: "過ぎ去った過去の失敗は仕方がない。これからの未来に向けてしっかりと挽回しよう。", category: "誠実・改善" },
+            { id: 41, chapter: "子張第十九", word: "日知其所亡、月無忘其所能、可謂好學也已矣。", reading: "日々に其の亡きところを知り、月に其の能うところを忘るること無くんば。", meaning: "毎日新しい知識を吸収し、身につけた才能を忘れないようにする。これこそ学ぶ姿だ。", category: "学び・成長" },
+            { id: 42, chapter: "子張第十九", word: "君子學以致其道。", reading: "君子は学んで以て其の道を致す。", meaning: "優れた人は、学問を修めることで自らの目指すべき生き方を完成させる。", category: "学び・成長" },
+            { id: 43, chapter: "堯曰第二十", word: "不知命、無以為君子也。", reading: "命を知らざれば、以て君子と為るなし。", meaning: "天命（自分に与えられた使命）を自覚しなければ、真に立派な人物にはなれない。", category: "志・覚悟" },
+            { id: 44, chapter: "堯曰第二十", word: "不知言、無以知人也。", reading: "言を知らざれば、以て人を知るなし。", meaning: "相手の言葉の真意を見抜けなければ、その人物の本質を正しく理解することはできない。", category: "学び・智慧" },
+            { id: 45, chapter: "為政第二", word: "視其所以、観其所由、察其所安。", reading: "其の所以を視、其の所由を観、其の所安を察す。", meaning: "その人がどのように行動し、なぜその道を選び、何に満足しているかを見れば本性は隠せない。", category: "自己省察" },
+            { id: 46, chapter: "里仁第四", word: "君子懷德、小人懷土。", reading: "君子は徳を懐い、小人は土を懐う。", meaning: "優れた人は徳を尊び、つまらない人は自分の居場所や利権に執着する。", category: "人間関係・修養" },
+            { id: 47, chapter: "雍也第六", word: "人之生也直、罔之生也幸而免。", reading: "人の生くるや直なり、これを罔いて生くるは幸いにして免るるなり。", meaning: "真っ直ぐに生きるのが本来の姿である。道を踏み外して生き延びているのは運が良いだけだ。", category: "誠実・態度" },
+            { id: 48, chapter: "述而第七", word: "不義而富且貴、於我如浮雲。", reading: "不義にして富且つ貴きは、我に於いて浮雲の如し。", meaning: "道義に反する方法で手に入れた富や地位など、私にとっては浮雲のようなものだ。", category: "志・覚悟" },
+            { id: 49, chapter: "子路第十三", word: "名不正则言不顺、言不顺则事不成。", reading: "名正しからざれば則ち言順わず。", meaning: "名分が正しくなければ言葉に説得力がなく、事業も成功しない。", category: "志・覚悟" },
+            { id: 50, chapter: "顔淵第十二", word: "四海之内、皆兄弟也。", reading: "四海の内、皆兄弟なり。", meaning: "世界のなかにあっては、すべての人が皆、兄弟のようなものである。", category: "仁・思いやり" }
+        ];
+
+        let currentQuote = null;
+
+        function startRoulette() {
+            const btn = document.getElementById('draw-btn');
+            const initialMsg = document.getElementById('initial-msg');
+            const loadingArea = document.getElementById('loading-area');
+            const resultArea = document.getElementById('result-area');
+            const rouletteText = document.getElementById('roulette-text');
+
+            btn.disabled = true;
+            initialMsg.classList.add('hidden');
+            resultArea.classList.add('hidden');
+            loadingArea.classList.remove('hidden');
+
+            let counter = 0;
+            const interval = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * rongoData.length);
+                rouletteText.textContent = rongoData[randomIndex].reading;
+                counter += 100;
+
+                if (counter >= 5000) {
+                    clearInterval(interval);
+                    showFinalResult();
+                }
+            }, 80);
+        }
+
+        function showFinalResult() {
+            const btn = document.getElementById('draw-btn');
+            const loadingArea = document.getElementById('loading-area');
+            const resultArea = document.getElementById('result-area');
+
+            const finalIndex = Math.floor(Math.random() * rongoData.length);
+            currentQuote = rongoData[finalIndex];
+
+            document.getElementById('res-chapter').textContent = currentQuote.chapter;
+            document.getElementById('res-category').textContent = currentQuote.category;
+            document.getElementById('res-reading').textContent = currentQuote.reading;
+            document.getElementById('res-meaning').textContent = currentQuote.meaning;
+
+            loadingArea.classList.add('hidden');
+            resultArea.classList.remove('hidden');
+            btn.disabled = false;
+        }
+
+        function shareOnX() {
+            if (!currentQuote) return;
+            const text = `今日の論語（${currentQuote.chapter}）\n\n「${currentQuote.reading}」\n\n${currentQuote.meaning}\n\n#今日の論語 #論語`;
+            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        }
+
+        function generateStoryImage() {
+            if (!currentQuote) return;
+            const canvas = document.getElementById('story-canvas');
+            const ctx = canvas.getContext('2d');
+
+            // 背景描画
+            ctx.fillStyle = "#2b223a";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // ドット背景模様
+            ctx.fillStyle = "#4a3b5c";
+            for(let x=0; x<canvas.width; x+=60) {
+                for(let y=0; y<canvas.height; y+=60) {
+                    ctx.fillRect(x, y, 10, 10);
+                }
+            }
+
+            // カード枠
+            ctx.fillStyle = "#fff8eb";
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 16;
+            ctx.strokeRect(90, 150, 900, 1620);
+            ctx.fillRect(90, 150, 900, 1620);
+
+            function wrapText(text, x, y, maxWidth, lineHeight) {
+                let words = text.split('');
+                let line = '';
+                for(let n = 0; n < words.length; n++) {
+                    let testLine = line + words[n];
+                    let metrics = ctx.measureText(testLine);
+                    if (metrics.width > maxWidth && n > 0) {
+                        ctx.fillText(line, x, y);
+                        line = words[n];
+                        y += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                ctx.fillText(line, x, y);
+                return y;
+            }
+
+            // タイトル
+            ctx.font = 'bold 64px "DotGothic16", monospace';
+            ctx.fillStyle = "#d9480f";
+            ctx.textAlign = "center";
+            ctx.fillText("★ 今日の論語 ★", canvas.width / 2, 280);
+
+            // バッジ
+            ctx.font = 'bold 36px "DotGothic16", monospace';
+            ctx.fillStyle = "#ffec99";
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 4;
+            
+            ctx.fillRect(180, 360, 320, 70);
+            ctx.strokeRect(180, 360, 320, 70);
+            ctx.fillRect(580, 360, 320, 70);
+            ctx.strokeRect(580, 360, 320, 70);
+
+            ctx.fillStyle = "#000000";
+            ctx.fillText(currentQuote.chapter, 340, 410);
+            ctx.fillText(currentQuote.category, 740, 410);
+
+            // 書き下し文
+            ctx.font = 'bold 52px "DotGothic16", monospace';
+            ctx.fillStyle = "#212529";
+            ctx.textAlign = "center";
+            let readingY = wrapText(currentQuote.reading, canvas.width / 2, 600, 800, 80);
+
+            // 区切り線
+            ctx.strokeStyle = "#ced4da";
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(180, readingY + 80);
+            ctx.lineTo(900, readingY + 80);
+            ctx.stroke();
+
+            // 意味ボックス
+            ctx.fillStyle = "#f8f9fa";
+            ctx.strokeStyle = "#dee2e6";
+            ctx.lineWidth = 6;
+            ctx.fillRect(180, readingY + 140, 720, 450);
+            ctx.strokeRect(180, readingY + 140, 720, 450);
+
+            ctx.font = 'bold 36px "DotGothic16", monospace';
+            ctx.fillStyle = "#495057";
+            ctx.textAlign = "left";
+            ctx.fillText("【 意味 】", 230, readingY + 220);
+
+            ctx.font = '38px "DotGothic16", monospace';
+            ctx.fillStyle = "#212529";
+            wrapText(currentQuote.meaning, 230, readingY + 300, 620, 56);
+
+            // フッター
+            ctx.font = '32px "DotGothic16", monospace';
+            ctx.fillStyle = "#868e96";
+            ctx.textAlign = "center";
+            ctx.fillText("毎日のルーティンに・今日の智慧をシェア", canvas.width / 2, 1700);
+
+            // ダウンロード発火
+            const link = document.createElement('a');
+            link.download = `rongo_${currentQuote.id}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
