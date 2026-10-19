@@ -328,7 +328,8 @@
         function shareOnX() {
             if (!currentQuote) return;
             const text = `今日の論語（${currentQuote.chapter}）\n\n「${currentQuote.reading}」\n\n${currentQuote.meaning}\n\n#今日の論語 #論語`;
-            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+            const siteUrl = 'https://hira-cmyk.github.io/todays-rongo/';
+            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(siteUrl)}`;
             window.open(url, '_blank');
         }
 
